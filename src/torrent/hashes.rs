@@ -1,10 +1,21 @@
 use core::fmt;
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Visitor};
+use std::ops::Deref;
+
+type PieceHash = [u8; 20];
 
 #[derive(Clone, Debug)]
-pub struct Hashes(Vec<[u8; 20]>);
-struct HashesVisitor;
+pub struct Hashes(pub Vec<PieceHash>);
 
+impl Deref for Hashes {
+    type Target = Vec<PieceHash>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+struct HashesVisitor;
 impl<'de> Visitor<'de> for HashesVisitor {
     type Value = Hashes;
 

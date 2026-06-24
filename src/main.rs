@@ -29,6 +29,13 @@ async fn main() -> Result<()> {
             if let Keys::SingleFile { length } = torrent.info.keys {
                 println!("Length: {length}");
             }
+
+            let hash = torrent.info_hash();
+            println!("{}", hex::encode(hash));
+
+            for piece_hash in torrent.info.pieces.iter() {
+                println!("Piece hash: {}", hex::encode(piece_hash));
+            }
         }
     }
 
