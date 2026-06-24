@@ -1,6 +1,5 @@
 mod hashes;
 
-use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use sha1::{Digest, Sha1};
 use std::path::Path;
@@ -15,7 +14,7 @@ pub struct Torrent {
     pub info: Info,
 }
 impl Torrent {
-    pub async fn read(path: impl AsRef<Path>) -> Result<Self> {
+    pub async fn read(path: impl AsRef<Path>) -> anyhow::Result<Self> {
         let torrent_file = tokio::fs::read(path).await?;
         Ok(serde_bencode::from_bytes(&torrent_file)?)
     }
@@ -25,6 +24,13 @@ impl Torrent {
             serde_bencode::to_bytes(&self.info).expect("re-encode info section should work fine");
         let hash = Sha1::digest(&bencoded_info);
         hash.into()
+    }
+
+    pub fn length(&self) -> u64 {
+        match &self.info.keys {
+            Keys::SingleFile { length } => *length,
+            Keys::MultiFile { files } => files.iter().map(|f| f.length).sum(),
+        }
     }
 }
 
